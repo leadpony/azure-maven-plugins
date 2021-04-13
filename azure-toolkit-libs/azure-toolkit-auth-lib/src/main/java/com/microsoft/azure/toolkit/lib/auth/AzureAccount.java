@@ -6,17 +6,20 @@
 package com.microsoft.azure.toolkit.lib.auth;
 
 import com.azure.core.management.AzureEnvironment;
+import com.azure.identity.DeviceCodeInfo;
 import com.microsoft.azure.toolkit.lib.AzureService;
 import com.microsoft.azure.toolkit.lib.account.IAzureAccount;
 import com.microsoft.azure.toolkit.lib.auth.core.azurecli.AzureCliAccount;
 import com.microsoft.azure.toolkit.lib.auth.core.devicecode.DeviceCodeAccount;
 import com.microsoft.azure.toolkit.lib.auth.core.oauth.OAuthAccount;
 import com.microsoft.azure.toolkit.lib.auth.core.serviceprincipal.ServicePrincipalAccount;
+import com.microsoft.azure.toolkit.lib.auth.core.vscode.VisualStudioCodeAccount;
 import com.microsoft.azure.toolkit.lib.auth.exception.AzureToolkitAuthenticationException;
 import com.microsoft.azure.toolkit.lib.auth.exception.LoginFailureException;
 import com.microsoft.azure.toolkit.lib.auth.model.AuthConfiguration;
 import com.microsoft.azure.toolkit.lib.auth.model.AuthType;
 import com.microsoft.azure.toolkit.lib.auth.util.AzureEnvironmentUtils;
+import com.microsoft.azure.toolkit.lib.common.utils.TextUtils;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
@@ -74,12 +77,25 @@ public class AzureAccount implements AzureService, IAzureAccount {
     }
 
     private Mono<Account> authenticateAccounts(List<Account> accounts) {
-        Mono<Account> current = accounts.get(0).login();
+        Mono<Account> current = loginAccountPrintDeviceCode(accounts.get(0));
         for (int i = 1; i < accounts.size(); i++) {
             final Account ac = accounts.get(i);
-            current = current.onErrorResume(e -> ac.login());
+            current = current.onErrorResume(e -> loginAccountPrintDeviceCode(ac));
         }
         return current;
+    }
+
+    private Mono<Account> loginAccountPrintDeviceCode(Account ac) {
+        if (ac.getAuthType() == AuthType.DEVICE_CODE) {
+            return ac.login().flatMap(ignore -> {
+                DeviceCodeInfo challenge = ((DeviceCodeAccount) ac).getDeviceCode();
+                System.out.println(StringUtils.replace(challenge.getMessage(), challenge.getUserCode(),
+                        TextUtils.cyan(challenge.getUserCode())));
+                return ((DeviceCodeAccount) ac).continueLogin();
+            });
+        } else {
+            return ac.login();
+        }
     }
 
     public Mono<Account> loginAsync(@Nonnull AuthConfiguration auth) {
@@ -173,6 +189,7 @@ public class AzureAccount implements AzureService, IAzureAccount {
         Map<AuthType, Supplier<Account>> map = new LinkedHashMap<>();
         // SP is not there since it requires special constructor argument and it is special(it requires complex auth configuration)
         map.put(AuthType.AZURE_CLI, AzureCliAccount::new);
+        map.put(AuthType.VSCODE, VisualStudioCodeAccount::new);
         map.put(AuthType.OAUTH2, OAuthAccount::new);
         map.put(AuthType.DEVICE_CODE, DeviceCodeAccount::new);
         return map;
