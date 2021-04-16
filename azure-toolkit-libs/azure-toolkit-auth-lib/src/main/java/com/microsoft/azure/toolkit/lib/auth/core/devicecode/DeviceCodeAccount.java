@@ -9,6 +9,7 @@ import com.azure.core.credential.TokenCredential;
 import com.azure.core.management.AzureEnvironment;
 import com.azure.identity.DeviceCodeCredentialBuilder;
 import com.azure.identity.DeviceCodeInfo;
+import com.azure.identity.TokenCachePersistenceOptions;
 import com.azure.identity.implementation.util.IdentityConstants;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.microsoft.azure.toolkit.lib.Azure;
@@ -19,6 +20,7 @@ import com.microsoft.azure.toolkit.lib.auth.RefreshTokenTokenCredentialManager;
 import com.microsoft.azure.toolkit.lib.auth.exception.AzureToolkitAuthenticationException;
 import com.microsoft.azure.toolkit.lib.auth.model.AuthType;
 import com.microsoft.azure.toolkit.lib.auth.util.AzureEnvironmentUtils;
+import org.apache.commons.lang3.StringUtils;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
@@ -87,6 +89,9 @@ public class DeviceCodeAccount extends Account {
         }
         AzureEnvironmentUtils.setupAzureEnvironment(env);
         DeviceCodeCredentialBuilder builder = new DeviceCodeCredentialBuilder();
+        if (StringUtils.isNotBlank(Azure.az().config().getTokenCacheName())) {
+            builder.tokenCachePersistenceOptions(new TokenCachePersistenceOptions().setName(Azure.az().config().getTokenCacheName()));
+        }
         return builder.clientId(IdentityConstants.DEVELOPER_SINGLE_SIGN_ON_ID)
                 .executorService(executorService)
                 .challengeConsumer(deviceCodeFuture::complete).build();

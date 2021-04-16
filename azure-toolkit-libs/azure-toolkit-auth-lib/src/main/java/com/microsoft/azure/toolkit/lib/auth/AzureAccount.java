@@ -10,6 +10,7 @@ import com.google.common.base.Preconditions;
 import com.microsoft.azure.toolkit.lib.AzureService;
 import com.microsoft.azure.toolkit.lib.account.IAzureAccount;
 import com.microsoft.azure.toolkit.lib.auth.core.azurecli.AzureCliAccount;
+import com.microsoft.azure.toolkit.lib.auth.core.cache.CachedTokenAccount;
 import com.microsoft.azure.toolkit.lib.auth.core.devicecode.DeviceCodeAccount;
 import com.microsoft.azure.toolkit.lib.auth.core.oauth.OAuthAccount;
 import com.microsoft.azure.toolkit.lib.auth.core.serviceprincipal.ServicePrincipalAccount;
@@ -103,6 +104,10 @@ public class AzureAccount implements AzureService, IAzureAccount {
     public Mono<Account> loginAsync(Account targetAccount) {
         Objects.requireNonNull(targetAccount, "Please specify account to login.");
         return targetAccount.login().doOnSuccess(this::setAccount);
+    }
+
+    public Mono<Account> restoreLoginFromCacheAsync(@Nonnull String clientId, @Nonnull String tenantId, @Nonnull String email) {
+        return loginAsync(new CachedTokenAccount(clientId, tenantId, email));
     }
 
     private AzureAccount blockMonoAndReturnThis(Mono<Account> mono) {

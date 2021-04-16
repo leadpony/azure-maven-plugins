@@ -8,6 +8,7 @@ package com.microsoft.azure.toolkit.lib.auth.core.oauth;
 import com.azure.core.credential.TokenCredential;
 import com.azure.core.management.AzureEnvironment;
 import com.azure.identity.InteractiveBrowserCredentialBuilder;
+import com.azure.identity.TokenCachePersistenceOptions;
 import com.azure.identity.implementation.util.IdentityConstants;
 import com.microsoft.azure.toolkit.lib.Azure;
 import com.microsoft.azure.toolkit.lib.auth.Account;
@@ -18,6 +19,7 @@ import com.microsoft.azure.toolkit.lib.auth.exception.AzureToolkitAuthentication
 import com.microsoft.azure.toolkit.lib.auth.model.AuthType;
 import com.microsoft.azure.toolkit.lib.auth.util.AzureEnvironmentUtils;
 import me.alexpanov.net.FreePortFinder;
+import org.apache.commons.lang3.StringUtils;
 import reactor.core.publisher.Mono;
 
 import java.awt.*;
@@ -54,8 +56,11 @@ public class OAuthAccount extends Account {
 
     protected static TokenCredential createCredential(AzureEnvironment env) {
         AzureEnvironmentUtils.setupAzureEnvironment(env);
-        return new InteractiveBrowserCredentialBuilder()
-                .redirectUrl("http://localhost:" + FreePortFinder.findFreeLocalPort())
+        InteractiveBrowserCredentialBuilder builder = new InteractiveBrowserCredentialBuilder();
+        if (StringUtils.isNotBlank(Azure.az().config().getTokenCacheName())) {
+            builder.tokenCachePersistenceOptions(new TokenCachePersistenceOptions().setName(Azure.az().config().getTokenCacheName()));
+        }
+        return builder.redirectUrl("http://localhost:" + FreePortFinder.findFreeLocalPort())
                 .build();
     }
 

@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
  */
 public enum AuthType {
     AUTO,
+    CACHE, // for internal use only
     SERVICE_PRINCIPAL,
     AZURE_AUTH_MAVEN_PLUGIN,
     MANAGED_IDENTITY,
