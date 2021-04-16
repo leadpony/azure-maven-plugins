@@ -36,7 +36,6 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-
 public class TokenCredentialManager implements TenantProvider, SubscriptionProvider {
     private static final ClientLogger LOGGER = new ClientLogger(TokenCredentialManager.class);
 
