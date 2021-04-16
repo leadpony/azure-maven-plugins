@@ -80,7 +80,7 @@
         <json.schema.validator.version>2.2.14</json.schema.validator.version>
         <groovy.version>2.5.11</groovy.version>
         <junit.version>4.13.1</junit.version>
-        <lombok.version>1.18.16</lombok.version>
+        <lombok.version>1.18.18</lombok.version>
         <rx.version>1.3.8</rx.version>
         <slf4j-api.version>1.7.30</slf4j-api.version>
 
@@ -127,7 +127,7 @@
                 <artifactId>jackson-core</artifactId>
                 <version>${jackson.version}</version>
             </dependency>
-           <dependency>
+            <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-databind</artifactId>
                 <version>${jackson.version}</version>
@@ -257,7 +257,35 @@
                         <groupId>com.nimbusds</groupId>
                         <artifactId>oauth2-oidc-sdk</artifactId>
                     </exclusion>
+                    <exclusion>
+                        <groupId>com.azure</groupId>
+                        <artifactId>azure-core</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>com.azure</groupId>
+                        <artifactId>azure-core-http-netty</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.linguafranca.pwdb</groupId>
+                        <artifactId>KeePassJava2</artifactId>
+                    </exclusion>
                 </exclusions>
+            </dependency>
+
+            <dependency>
+                <groupId>com.azure</groupId>
+                <artifactId>azure-core</artifactId>
+                <version>1.15.0</version>
+            </dependency>
+            <dependency>
+                <groupId>com.azure</groupId>
+                <artifactId>azure-core-http-okhttp</artifactId>
+                <version>1.6.1</version>
+            </dependency>
+            <dependency>
+                <groupId>com.squareup.okhttp3</groupId>
+                <artifactId>okhttp</artifactId>
+                <version>4.9.1</version>
             </dependency>
             <dependency>
                 <groupId>com.nimbusds</groupId>
