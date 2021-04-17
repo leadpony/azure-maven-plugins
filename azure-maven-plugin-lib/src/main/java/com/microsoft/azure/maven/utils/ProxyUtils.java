@@ -29,7 +29,12 @@ public class ProxyUtils {
                 final Proxy mavenProxy = mavenProxies.stream().filter(
                     proxy -> proxy.isActive() && proxy.getPort() > 0 && StringUtils.isNotBlank(proxy.getHost())).findFirst().orElse(null);
                 if (mavenProxy != null) {
-                    proxyManager.configure(mavenProxy.getHost(), mavenProxy.getPort());
+                    if (StringUtils.isNotBlank(mavenProxy.getUsername()) && StringUtils.isNoneBlank(mavenProxy.getPassword())) {
+                        proxyManager.configure(mavenProxy.getHost(), mavenProxy.getPort(),
+                                mavenProxy.getUsername(), mavenProxy.getPassword());
+                    } else {
+                        proxyManager.configure(mavenProxy.getHost(), mavenProxy.getPort());
+                    }
                     source = "maven";
                 }
             }

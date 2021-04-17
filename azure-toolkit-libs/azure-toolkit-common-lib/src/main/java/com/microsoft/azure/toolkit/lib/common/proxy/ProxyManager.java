@@ -12,7 +12,9 @@ import org.apache.commons.lang3.StringUtils;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
+import java.net.Authenticator;
 import java.net.InetSocketAddress;
+import java.net.PasswordAuthentication;
 import java.net.Proxy;
 import java.net.ProxySelector;
 import java.net.SocketAddress;
@@ -29,6 +31,8 @@ public class ProxyManager {
     private static final boolean isSystemProxyUnset = StringUtils.isBlank(System.getProperty(PROPERTY_USE_SYSTEM_PROXY));
     @Getter
     private Proxy proxy;
+
+    private PasswordAuthentication authentication;
 
     private static class ProxyManagerHolder {
         private static final ProxyManager INSTANCE = new ProxyManager();
@@ -70,6 +74,14 @@ public class ProxyManager {
         replaceDefaultProxySelector();
     }
 
+    public void configure(@Nonnull String httpProxyHost, @Nonnull Integer httpProxyPort, @Nonnull String username, @Nonnull String password) {
+        Preconditions.checkNotNull(username, "username must not be null.");
+        Preconditions.checkNotNull(password, "password must not be null.");
+        configure(httpProxyHost, httpProxyPort);
+        this.authentication = new PasswordAuthentication(username, password.toCharArray());
+        replaceDefaultAuthenticator();
+    }
+
     public void init() {
         // we need to init at the program start before any internet access
         if (isSystemProxyUnset) {
@@ -95,6 +107,15 @@ public class ProxyManager {
 
             @Override
             public void connectFailed(URI uri, SocketAddress sa, IOException ioe) {
+            }
+        });
+    }
+
+    private void replaceDefaultAuthenticator() {
+        Authenticator.setDefault(new Authenticator() {
+            @Override
+            public PasswordAuthentication getPasswordAuthentication() {
+                return ProxyManager.this.authentication;
             }
         });
     }
